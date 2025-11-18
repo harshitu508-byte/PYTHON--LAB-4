@@ -1,0 +1,102 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Task 1: Data Acquisition and Loading
+def load_data(filepath):
+    df = pd.read_csv(filepath)
+    print(df.head())
+    print(df.info())
+    print(df.describe())
+    return df
+
+# Task 2: Data Cleaning and Processing
+def clean_data(df):
+    # Convert date column to datetime
+    df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+    # Handle missing values by dropping or filling
+    df = df.dropna(subset=['Date', 'Temperature', 'Rainfall', 'Humidity'])
+    # Filter relevant columns
+    df = df[['Date', 'Temperature', 'Rainfall', 'Humidity']]
+    return df
+
+# Task 3: Statistical Analysis with NumPy
+def compute_stats(df):
+    daily_stats = df.groupby('Date').agg({
+        'Temperature': ['mean', 'min', 'max', 'std'],
+        'Rainfall': ['mean', 'min', 'max', 'std'],
+        'Humidity': ['mean', 'min', 'max', 'std'],
+    })
+    print(daily_stats.head())
+    return daily_stats
+
+# Task 4: Visualization with Matplotlib
+def plot_data(df):
+    # Line chart: daily temperature trends
+    plt.figure(figsize=(10, 5))
+    plt.plot(df['Date'], df['Temperature'], label='Temperature')
+    plt.title('Daily Temperature Trends')
+    plt.xlabel('Date')
+    plt.ylabel('Temperature')
+    plt.legend()
+    plt.grid()
+    plt.savefig('daily_temperature_trends.png')
+    plt.show()
+
+    # Bar chart: monthly rainfall totals
+    monthly_rainfall = df.resample('M', on='Date')['Rainfall'].sum()
+    plt.figure(figsize=(10, 5))
+    monthly_rainfall.plot(kind='bar')
+    plt.title('Monthly Rainfall Totals')
+    plt.xlabel('Month')
+    plt.ylabel('Total Rainfall')
+    plt.savefig('monthly_rainfall_totals.png')
+    plt.show()
+
+    # Scatter plot: humidity vs temperature
+    plt.figure(figsize=(8, 6))
+    plt.scatter(df['Humidity'], df['Temperature'], alpha=0.5)
+    plt.title('Humidity vs Temperature')
+    plt.xlabel('Humidity')
+    plt.ylabel('Temperature')
+    plt.savefig('humidity_vs_temperature.png')
+    plt.show()
+
+    # Combined plot: Temperature and Rainfall
+    fig, ax1 = plt.subplots(figsize=(10, 5))
+    ax1.plot(df['Date'], df['Temperature'], 'r-', label='Temperature')
+    ax2 = ax1.twinx()
+    ax2.bar(df['Date'], df['Rainfall'], alpha=0.3, label='Rainfall')
+    ax1.set_xlabel('Date')
+    ax1.set_ylabel('Temperature')
+    ax2.set_ylabel('Rainfall')
+    plt.title('Temperature and Rainfall Over Time')
+    fig.tight_layout()
+    plt.savefig('combined_temperature_rainfall.png')
+    plt.show()
+
+# Task 5: Grouping and Aggregation
+def group_and_aggregate(df):
+    monthly_stats = df.resample('M', on='Date').agg({
+        'Temperature': ['mean', 'min', 'max'],
+        'Rainfall': 'sum',
+        'Humidity': 'mean'
+    })
+    print(monthly_stats.head())
+    return monthly_stats
+
+# Task 6: Export and Storytelling
+def export_data(df, filename):
+    df.to_csv(filename, index=False)
+
+def main():
+    filepath = 'your_weather_data.csv'  # Replace with your actual CSV file path
+    df = load_data(filepath)
+    df = clean_data(df)
+    compute_stats(df)
+    plot_data(df)
+    monthly_stats = group_and_aggregate(df)
+    export_data(df, 'cleaned_weather_data.csv')
+
+if _name_ == '_main_':
+    main()
